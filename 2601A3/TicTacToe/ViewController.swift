@@ -14,6 +14,9 @@ class ViewController: UIViewController {
     var playerTurn: Bool = true;
     var gameStarted: Bool = false;
     var moves = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    var xMoves = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    var oMoves = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+
     var gameActive = true;
     var flag: Bool = false;
     
@@ -24,7 +27,6 @@ class ViewController: UIViewController {
         if(gameStarted == true){
             sender.setTitle("Stop",for: .normal)
             resetGame();
-            
             gameStarted = false;
             toggleButtons(flag: true);
         }
@@ -44,17 +46,29 @@ class ViewController: UIViewController {
                 sender.setImage(#imageLiteral(resourceName: "button_x"), for: UIControlState())
                 playerTurn = false;
                 moves[sender.tag-1] = 1; //Move has been used
-                if(Game().checkGameOver(arr: moves) == 1){
+                xMoves[sender.tag-1] = 1;
+                if(Game().checkTie(availableMoves: moves) == 1){
+                    //Game is a tie
+                    showText.text = "It's a tie!"
+                    toggleButtons(flag: false);
+                }
+                else if(Game().checkGameOver(arr: xMoves) == 1){
                     //Player 1 has won
                     showText.text = "Player 1 has won!"
-                    toggleButtons(flag: false);
+                    toggleButtons(flag: false); 
                 }
             }
             else {
                 sender.setImage(#imageLiteral(resourceName: "button_o"), for: UIControlState())
                 playerTurn = true;
                 moves[sender.tag-1] = 1; //Move has been used
-                if(Game().checkGameOver(arr: moves) == 2){
+                oMoves[sender.tag-1] = 1
+                if(Game().checkTie(availableMoves: moves) == 1){
+                    //Game is a tie
+                    showText.text = "It's a tie!"
+                    toggleButtons(flag: false);
+                }
+                else if(Game().checkGameOver(arr: oMoves) == 1){
                     //Player 2 has won
                     showText.text = "Player 2 has won!"
                     toggleButtons(flag: false);
@@ -100,6 +114,8 @@ class ViewController: UIViewController {
     func resetGame(){
         playerTurn = true;
         moves = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        xMoves = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+        oMoves = [0, 0, 0, 0, 0, 0, 0, 0, 0];
         for i in 1...9{
             let button = view.viewWithTag(i) as! UIButton
             button.setImage(#imageLiteral(resourceName: "button_empty"), for: UIControlState())

@@ -16,17 +16,20 @@ class Game: ViewController{
         for condition in winningConditions{
             if(arr[condition[0]] != 0 && arr[condition[0]] == arr[condition[1]] && arr[condition[1]] == arr[condition[2]]){
                 if(arr[condition[0]] == 1){
-                    //X has won
-                    print("X has won!");
+                    print("A player has won...");
                     return 1;
-                }
-                else{
-                    //O has won
-                    print("O has won!");
-                    return 2;
                 }
             }
         }
         return 0; //Returning 0 means the game is not over
+    }
+    func checkTie(availableMoves: [Int])->Int{
+        print(availableMoves)
+        for i in availableMoves{
+            if(i == 0){
+                return 0
+            }
+        }
+        return 1 //Game is a tie
     }
 }
