@@ -9,73 +9,9 @@
 import UIKit
 
 //Images are in the Assets.xcassets folder!!!
-class ViewController: UIViewController {
-
-    var playerTurn: Bool = true;
-    var gameStarted: Bool = false;
-    var moves = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    var xMoves = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-    var oMoves = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-
-    var gameActive = true;
-    var flag: Bool = false;
+class ViewController: UIViewController, Observer {
     
-    @IBOutlet weak var showText: UILabel!
-    
-    @IBAction func startAction(_ sender: UIButton) {
-        print("Start button pressed");
-        if(gameStarted == true){
-            sender.setTitle("Stop",for: .normal)
-            resetGame();
-            gameStarted = false;
-            toggleButtons(flag: true);
-        }
-        else{
-            sender.setTitle("Start",for: .normal) //Set button to start meaning user has clicked stop
-            toggleButtons(flag: false);
-            gameStarted = true;
-        }
-        
-        //Start game activity (Thread)
-    }
-    
-    @IBAction func buttonPress(_ sender: UIButton) {
-        showText.text = "Button \(sender.tag) pressed"
-        if(moves[sender.tag-1] == 0){
-            if playerTurn == true {
-                sender.setImage(#imageLiteral(resourceName: "button_x"), for: UIControlState())
-                playerTurn = false;
-                moves[sender.tag-1] = 1; //Move has been used
-                xMoves[sender.tag-1] = 1;
-                if(Game().checkTie(availableMoves: moves) == 1){
-                    //Game is a tie
-                    showText.text = "It's a tie!"
-                    toggleButtons(flag: false);
-                }
-                else if(Game().checkGameOver(arr: xMoves) == 1){
-                    //Player 1 has won
-                    showText.text = "Player 1 has won!"
-                    toggleButtons(flag: false); 
-                }
-            }
-            else {
-                sender.setImage(#imageLiteral(resourceName: "button_o"), for: UIControlState())
-                playerTurn = true;
-                moves[sender.tag-1] = 1; //Move has been used
-                oMoves[sender.tag-1] = 1
-                if(Game().checkTie(availableMoves: moves) == 1){
-                    //Game is a tie
-                    showText.text = "It's a tie!"
-                    toggleButtons(flag: false);
-                }
-                else if(Game().checkGameOver(arr: oMoves) == 1){
-                    //Player 2 has won
-                    showText.text = "Player 2 has won!"
-                    toggleButtons(flag: false);
-                }
-            }
-        }
-    }
+    let game: Game = Game();
     
     @IBOutlet weak var btn1: UIButton!
     @IBOutlet weak var btn2: UIButton!
@@ -86,28 +22,110 @@ class ViewController: UIViewController {
     @IBOutlet weak var btn7: UIButton!
     @IBOutlet weak var btn8: UIButton!
     @IBOutlet weak var btn9: UIButton!
-    func toggleButtons(flag: Bool){
-        if(flag == true){
-            btn1.isEnabled = true;
-            btn2.isEnabled = true;
-            btn3.isEnabled = true;
-            btn4.isEnabled = true;
-            btn5.isEnabled = true;
-            btn6.isEnabled = true;
-            btn7.isEnabled = true;
-            btn8.isEnabled = true;
-            btn9.isEnabled = true;
+    @IBOutlet weak var startButton: UIButton!
+
+    @IBOutlet weak var compSwitch: UISwitch!
+    @IBOutlet weak var showText: UILabel!
+    
+    var playerTurn: Bool = true;
+    var gameStarted: Bool = false;
+    var moves = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    var xMoves = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    var oMoves = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    
+    var gameActive = true;
+    let bgqueue = DispatchQueue.global(qos: .background);
+    
+    var sleepTime: UInt32 = 2000000;
+    
+    func didWin(verdict: Int, player: Int) {
+        if (player == 3 && verdict == 1) { //tie
+            showText.text = "It's a tie!"
+        }
+        if (verdict == 0) {
+            //resume game, just display move
+            return;
+        }
+        else if (verdict == 1) {
+            if (player == 1) { //player won
+                showText.text = "X has won!"
+                print("X won")
+            }
+            else { //computer won
+                showText.text = "O has won!"
+                print("O won")
+            }
+        }
+        print("Does stuff...");
+        toggleButtons(flag: false);
+        startAction(nil);
+    }
+    
+    @IBAction func startAction(_ sender: UIButton?) {
+        gameStarted = !gameStarted;
+        print("gameStarted is \(gameStarted)");
+        if (gameStarted) {
+            startGame();
         }
         else{
-            btn1.isEnabled = false;
-            btn2.isEnabled = false;
-            btn3.isEnabled = false;
-            btn4.isEnabled = false;
-            btn5.isEnabled = false;
-            btn6.isEnabled = false;
-            btn7.isEnabled = false;
-            btn8.isEnabled = false;
-            btn9.isEnabled = false;
+            endGame();
+        }
+    }
+    
+    func endGame() {
+        startButton.setTitle("Start", for: .normal) //Set button to start meaning user has clicked stop
+        toggleButtons(flag: false);
+    }
+    
+    func startGame() {
+        startButton.setTitle("Stop", for: .normal);
+        resetGame();
+        toggleButtons(flag: true);
+        if compSwitch.isOn { //create thread
+            bgqueue.async {
+                while (self.gameStarted) {
+                    DispatchQueue.main.async { //update UI here
+                        
+                        self.AIMove();
+                    }
+                    usleep(self.sleepTime);
+                }
+            }
+        }
+
+    }
+    
+    func AIMove() { //implemented AI logic here
+        
+        toggleButtons(flag: true);
+        //buttonPress(_);
+        toggleButtons(flag: false)
+    }
+    
+    @IBAction func buttonPress(_ sender: UIButton) {
+        showText.text = "Button \(sender.tag) pressed"
+        if(moves[(sender.tag)-1] == 0){
+            if (playerTurn) {
+                sender.setImage(#imageLiteral(resourceName: "button_x"), for: UIControlState())
+                moves[(sender.tag)-1] = 1; //Move has been used
+                xMoves[(sender.tag)-1] = 1;
+                game.xMoves = xMoves;
+            }
+            else {
+                sender.setImage(#imageLiteral(resourceName: "button_o"), for: UIControlState())
+                moves[(sender.tag)-1] = 1; //Move has been used
+                oMoves[(sender.tag)-1] = 1
+                game.oMoves = oMoves;
+            }
+            game.moves = moves;
+            playerTurn = !playerTurn;
+        }
+    }
+    
+    func toggleButtons(flag: Bool) {
+        for i in 1...9 {
+            let button = view.viewWithTag(i) as! UIButton
+            button.isEnabled = flag;
         }
     }
     
@@ -116,7 +134,12 @@ class ViewController: UIViewController {
         moves = [0, 0, 0, 0, 0, 0, 0, 0, 0];
         xMoves = [0, 0, 0, 0, 0, 0, 0, 0, 0];
         oMoves = [0, 0, 0, 0, 0, 0, 0, 0, 0];
-        for i in 1...9{
+        //game.moves = moves;
+        game.xMoves = xMoves;
+        game.oMoves = oMoves;
+        game.moves = moves;
+        
+        for i in 1...9 {
             let button = view.viewWithTag(i) as! UIButton
             button.setImage(#imageLiteral(resourceName: "button_empty"), for: UIControlState())
         }
@@ -124,16 +147,14 @@ class ViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        gameStarted = true;
-        toggleButtons(flag: false);
-        // Do any additional setup after loading the view, typically from a nib.
-    }
+        game.attachObserver(observer: self);
 
+        toggleButtons(flag: false);
+    }
+    
+    
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
-
-
 }
 
