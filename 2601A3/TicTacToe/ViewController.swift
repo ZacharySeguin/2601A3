@@ -51,7 +51,7 @@ class ViewController: UIViewController, Observer {
                 showText.text = "X has won!"
                 print("X won")
             }
-            else { //computer won
+            else if (player == 2) { //computer won
                 showText.text = "O has won!"
                 print("O won")
             }
