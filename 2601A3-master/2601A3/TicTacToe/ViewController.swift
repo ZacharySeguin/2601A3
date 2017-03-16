@@ -6,6 +6,8 @@
 //  Copyright © 2017 Maxim Kuzmenko. All rights reserved.
 //
 
+//Zachary Seguin 101000589 
+//Maxim Kuzmenko 
 import UIKit
 
 //Images are in the Assets.xcassets folder!!!

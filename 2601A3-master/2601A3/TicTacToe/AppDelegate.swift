@@ -2,10 +2,12 @@
 //  AppDelegate.swift
 //  TicTacToe
 //
-//  Created by Maxim Kuzmenko on 2017-03-08.
-//  Copyright © 2017 Maxim Kuzmenko. All rights reserved.
+//  Created by Maxim Kuzmenko and Zachary Seguin on 2017-03-08.
+//  Copyright © 2017 Maxim Kuzmenko and Zachary Seguin. All rights reserved.
 //
 
+//Zachary Seguin 101000589
+//Maxim Kuzmenko
 import UIKit
 
 @UIApplicationMain
