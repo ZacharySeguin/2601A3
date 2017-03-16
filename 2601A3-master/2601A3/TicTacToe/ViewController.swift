@@ -41,7 +41,6 @@ class ViewController: UIViewController, Observer {
     func didWin(verdict: Int, player: Int) {
         if (player == 3 && verdict == 1) { //tie
             showText.text = "It's a tie!"
-            toggleButtons(flag: false)
             gameActive = false;
         }
         if (verdict == 0) {
@@ -51,13 +50,11 @@ class ViewController: UIViewController, Observer {
         else if (verdict == 1) {
             if (player == 1) { //player won
                 showText.text = "X has won!"
-                toggleButtons(flag: false)
                 print("X won")
                 gameActive = false
             }
             else if (player == 2) { //computer won
                 showText.text = "O has won!"
-                toggleButtons(flag: false)
                 print("O won")
                 gameActive = false
             }
@@ -169,18 +166,22 @@ class ViewController: UIViewController, Observer {
                 xMoves[(sender.tag)-1] = 1;
                 game.xMoves = xMoves;
                 game.moves = moves;
+                if(compSwitch.isOn == true){
+                    toggleButtons(flag: false)
+                }
                 playerTurn = !playerTurn;
-                toggleButtons(flag: false)
             }
-            else if (!playerTurn && compSwitch.isOn) {
+            else if (!playerTurn) {
                 sender.setImage(#imageLiteral(resourceName: "button_o"), for: UIControlState.normal)
                 sender.setImage(#imageLiteral(resourceName: "button_o"), for: UIControlState.disabled)
                 moves[(sender.tag)-1] = 1; //Move has been used
                 oMoves[(sender.tag)-1] = 1
                 game.oMoves = oMoves;
                 game.moves = moves;
+                if(compSwitch.isOn == true){
+                    toggleButtons(flag: true)
+                }
                 playerTurn = !playerTurn;
-                toggleButtons(flag: true)
             }
         }
         print("playerTurn is \(playerTurn)");
